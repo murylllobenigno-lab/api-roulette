@@ -10,7 +10,12 @@ const API_URL =
 
 app.get("/roulette", async (req, res) => {
   try {
-    const r = await fetch(API_URL);
+    const r = await fetch(API_URL, {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json"
+      }
+    });
     const data = await r.json();
     res.json(data);
   } catch (e) {
