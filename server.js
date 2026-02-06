@@ -5,6 +5,7 @@ import cors from "cors";
 const app = express();
 app.use(cors());
 
+// URLs das variantes de roleta que queremos buscar
 const URLS = [
   "https://api.casinoscores.com/svc-evolution-game-events/api/immersiveroulette?page=0&size=50&sort=data.settledAt,desc",
   "https://api.casinoscores.com/svc-evolution-game-events/api/classicroulette?page=0&size=50&sort=data.settledAt,desc"
@@ -12,12 +13,12 @@ const URLS = [
 
 app.get("/roulette", async (req, res) => {
   try {
-    // Busca todas as variantes em paralelo
+    // Buscar todas as variantes em paralelo
     const resultados = await Promise.all(
       URLS.map(url => fetch(url).then(r => r.json()))
     );
 
-    // Extrair apenas os números válidos de cada resultado
+    // Extrair apenas os números válidos
     let numeros = [];
     resultados.forEach(data => {
       if (data?.content) {
@@ -33,7 +34,7 @@ app.get("/roulette", async (req, res) => {
 
     res.json({ numeros });
   } catch (e) {
-    console.log("Erro API:", e);
+    console.error("Erro API:", e);
     res.status(500).json({ error: "Erro ao buscar dados" });
   }
 });
@@ -43,4 +44,4 @@ app.get("/", (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Servidor rodando na porta", PORT));
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
