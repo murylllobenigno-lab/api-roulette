@@ -5,43 +5,28 @@ import cors from "cors";
 const app = express();
 app.use(cors());
 
-// URLs das variantes de roleta que queremos buscar
-const URLS = [
-  "https://api.casinoscores.com/svc-evolution-game-events/api/immersiveroulette?page=0&size=50&sort=data.settledAt,desc",
-  "https://api.casinoscores.com/svc-evolution-game-events/api/classicroulette?page=0&size=50&sort=data.settledAt,desc"
-];
+const API_URL =
+  "https://api.casinoscores.com/svc-evolution-game-events/api/immersiveroulette?page=0&size=50&sort=data.settledAt,desc";
 
 app.get("/roulette", async (req, res) => {
   try {
-    // Buscar todas as variantes em paralelo
-    const resultados = await Promise.all(
-      URLS.map(url => fetch(url).then(r => r.json()))
-    );
+    const r = await fetch(API_URL);
+    const data = await r.json();
 
-    // Extrair apenas os números válidos
-    let numeros = [];
-    resultados.forEach(data => {
-      if (data?.content) {
-        const nums = data.content
-          .map(e => e?.data?.result?.outcome?.number)
-          .filter(n => typeof n === "number");
-        numeros.push(...nums);
-      }
-    });
+    // Extrair apenas os números
+    const numeros = data.content
+      ?.map(e => e?.data?.result?.outcome?.number)
+      .filter(n => typeof n === "number");
 
-    // Manter apenas os últimos 5 números
-    numeros = numeros.slice(0, 5);
-
-    res.json({ numeros });
+    res.json({ numeros }); // retorna { numeros: [17, 4, 22, 0, 5] }
   } catch (e) {
-    console.error("Erro API:", e);
     res.status(500).json({ error: "Erro ao buscar dados" });
   }
 });
 
 app.get("/", (req, res) => {
-  res.send("API Roulette ONLINE - Todas variantes");
+  res.send("API Roulette ONLINE");
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+app.listen(PORT, () => console.log("Servidor rodando na porta", PORT));
